@@ -7,7 +7,7 @@ tfkl = tfk.layers
 
 
 class ConvNet:  # Convolutional Net
-    def __init__(self, input_shape=(), epochs=100, learning_rate=0.001, batch_size=50, padding='same',
+    def __init__(self, input_shape=(), epochs=100, loss='mse', learning_rate=0.001, batch_size=50, padding='same',
                  kernel_size=None, stride=2):
         if kernel_size is None:
             self.kernel_size = [3, 3]
@@ -31,8 +31,10 @@ class ConvNet:  # Convolutional Net
         #self.images = tfk.Input(dtype=tf.float32, shape=input_shape, name="Images")
         self.structure_net()
 
-        optimizer = tf.keras.optimizers.Adam(learning_rate)
-        self.model.compile(optimizer=optimizer, loss='mse', metrics=['accuracy'])
+        #optimizer = tf.keras.optimizers.Adam(learning_rate)
+        optimizer = tfk.optimizers.RMSprop(learning_rate)
+        bce = tf.keras.losses.BinaryCrossentropy()
+        self.model.compile(optimizer=optimizer, loss=bce, metrics=['accuracy'])
 
         # Print model
         self.model.summary()
@@ -51,13 +53,17 @@ class ConvNet:  # Convolutional Net
                         data_format='channels_last'),
             tfkl.MaxPool2D((2, 2)),
             tfkl.Flatten(),
-            tfkl.Dense(1000, activation=self.activ_func),
-            tfkl.Dense(1, activation=self.out_activ_func)
+            tfkl.Dense(2000, activation=self.activ_func),
+            tfkl.Dense(101, activation=tfk.activations.softmax)
         ])
 
 
-    def fit(self, x, y):
-        self.logs = self.model.fit(x, y, batch_size=self.batch_size, epochs=self.epochs)
+    def fit(self, x, y, val_data=None):
+        self.logs = self.model.fit(x, y,
+                                   batch_size=self.batch_size,
+                                   epochs=self.epochs,
+                                   shuffle=True,
+                                   validation_data=(val_data[0], val_data[1]))
 
 
     def predict(self, x):
