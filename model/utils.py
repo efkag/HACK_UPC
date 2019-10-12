@@ -4,7 +4,15 @@ import matplotlib.pyplot as plt
 
 imgs_path = 'Dataset/training_data/'
 labels_path = 'Dataset/training_labels.txt'
+
+
 def load_data(min, max):
+    """
+    Load images from the dataset within a given range
+    :param min: Lower bound for array index
+    :param max: Uper bound for array index
+    :return: Python list of 3d numpy images
+    """
     imgs = []
     for img_file in range(min, max):
         imgs.append(cv.imread(imgs_path + str(img_file) + '.jpg'))
@@ -40,7 +48,6 @@ def load_labels():
 def sample_from_each_class(data):
     sample_data = []
     sample_data.append(np.random.choice(data))
-
 
 
 # Example to load and display images
