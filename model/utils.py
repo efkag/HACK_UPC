@@ -67,7 +67,6 @@ def sample_rand_from_each_class(samples_num):
     data_pointer = 0
     interval = 1001
     dataset_sample = []
-
     for i in range(0, 101):
         class_sample = []
         # Sample indexes with the class range
