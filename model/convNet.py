@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow import keras as tfk
 tfkb = tfk.backend
@@ -22,6 +23,7 @@ class ConvNet:  # Convolutional Net
         self.padding = padding  # SAME or VALID
         self.input_shape = input_shape
         self.batch_size = batch_size
+        self.logs = None
 
         self.model = None
         # Network structure
@@ -49,16 +51,21 @@ class ConvNet:  # Convolutional Net
                         data_format='channels_last'),
             tfkl.MaxPool2D((2, 2)),
             tfkl.Flatten(),
-            tfkl.Dense(512, activation=self.activ_func),
-            tfkl.Dense(1, activation=self.activ_func)
+            tfkl.Dense(1000, activation=self.activ_func),
+            tfkl.Dense(1, activation=self.out_activ_func)
         ])
 
 
     def fit(self, x, y):
-        self.model.fit(x, y, batch_size=self.batch_size, epochs=self.epochs)
+        self.logs = self.model.fit(x, y, batch_size=self.batch_size, epochs=self.epochs)
 
 
     def predict(self, x):
         return self.model.predict(x)
 
-
+    def visualize_perf(self):
+        print(self.logs.history.keys())
+        plt.plot(self.logs.history['acc'], label='accuracy')
+        plt.plot(self.logs.history['loss'], label='loss')
+        plt.legend()
+        plt.show()

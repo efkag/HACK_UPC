@@ -122,8 +122,7 @@ def sample_pos_neg_equal(pos_class):
     lower += '000'
     lower = int(pos_class)
     upper = lower + interval
-    # TODO: Need to ask Norbert how manny classes there are and if the interval
-    # 1000 images for each class
+
     # Sample full positive class
     dataset_sample.extend(load_data_range(lower, upper))
     # create positive targets
@@ -137,6 +136,7 @@ def sample_pos_neg_equal(pos_class):
     targets = np.concatenate((targets, np.full((1000,), 0)))
 
     return np.array(dataset_sample), targets
+
 
 
 
