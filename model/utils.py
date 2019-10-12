@@ -45,6 +45,15 @@ def display_image(image):
     plt.show()
 
 
+def get_img_size(image):
+    """
+    Return the image shape if the image given is ndarray
+    :param image: ndarray representation of the image
+    """
+    height, width = np.squeeze(image).shape
+    return height, width
+
+
 def load_labels():
     """
     Read labels into python list
@@ -76,7 +85,7 @@ def sample_rand_from_each_class(samples_num):
         # Append to the dataset sample
         dataset_sample.extend(class_sample)
 
-    print(len(dataset_sample))
+    #print(len(dataset_sample))
     return dataset_sample
 
 
@@ -97,6 +106,12 @@ def sample_random_from_class(class_pointer, sample_num):
 
 
 def sample_pos_neg_equal(pos_class):
+    """
+    Create dataset of 1000 positives and 1000 negatives with 10 negatives
+    from each of the negative classes. Also returns targets
+    :param pos_class: Int the number of the possitive class
+    :return: List of dataset sample ndarray + targets
+    """
     interval = 1000
     sample_size = 10
     dataset_sample = []
@@ -111,13 +126,17 @@ def sample_pos_neg_equal(pos_class):
     # 1000 images for each class
     # Sample full positive class
     dataset_sample.extend(load_data_range(lower, upper))
+    # create positive targets
+    targets = np.full((1000,), 1)
 
-    # Sample 100 images from each of the other classes
+    # Sample 10 images from each of the other classes
     for i in range(0, number_of_classes):
         if i is not pos_class:
             dataset_sample.extend(sample_random_from_class(i, sample_size))
 
-    return dataset_sample
+    targets = np.concatenate((targets, np.full((1000,), 0)))
+
+    return np.array(dataset_sample), targets
 
 
 
@@ -125,9 +144,11 @@ def sample_pos_neg_equal(pos_class):
 # images = load_data(0, 5)
 # display_image(images[0])
 #
-# # Example to load labels
+# Example to load labels
 # labels = load_labels()
 # print(len(labels))
+# print(labels[0])
+# print(labels[1000])
 # labels = np.array(labels)
 # labels = np.unique(labels)
 # print(labels.shape)
