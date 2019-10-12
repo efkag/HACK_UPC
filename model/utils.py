@@ -1,10 +1,12 @@
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import imread
 
 imgs_path = 'Dataset/training_data/'
 labels_path = 'Dataset/training_labels.txt'
 number_of_classes = 101
+
 
 def load_data_range(min, max):
     """
@@ -15,9 +17,21 @@ def load_data_range(min, max):
     """
     imgs = []
     for img_file in range(min, max):
-        imgs.append(cv.imread(imgs_path + str(img_file) + '.jpg'))
+        imgs.append(imread(imgs_path + str(img_file) + '.jpg'))
 
     return imgs
+
+
+def load_full():
+
+    imgs = []
+    for img_file in range(0, 60000):
+        imgs.append(imread(imgs_path + str(img_file) + '.jpg'))
+    targets = []
+    for t in range(1, 50):
+        targets.extend([t] * 1000)
+
+    return imgs, targets
 
 
 def load_data_indexes(indexes):
@@ -28,7 +42,7 @@ def load_data_indexes(indexes):
     """
     imgs = []
     for img_file in indexes:
-        imgs.append(cv.imread(imgs_path + str(img_file) + '.jpg'))
+        imgs.append(imread(imgs_path + str(img_file) + '.jpg'))
 
     return imgs
 
@@ -39,7 +53,7 @@ def display_image(image):
     :param image: Input image to display
     """
     image = np.squeeze(image)
-    plt.imshow(image, interpolation='bilinear')
+    plt.imshow(image)
     plt.xticks([]), plt.yticks([])  # to hide tick values on X and Y axis
     # or plt.axis('off')
     plt.show()
@@ -67,6 +81,13 @@ def load_labels():
     return labels
 
 
+def load_labels_unique():
+    labels = load_labels()
+    labels = np.array(labels)
+    labels = np.unique(labels)
+    return labels
+
+
 def sample_rand_from_each_class(samples_num):
     """
     Sample a gicven number of images from each class
@@ -89,6 +110,7 @@ def sample_rand_from_each_class(samples_num):
     return dataset_sample
 
 
+
 def sample_random_from_class(class_pointer, sample_num):
     """
     Sample from a given class a given number of samples
@@ -105,7 +127,7 @@ def sample_random_from_class(class_pointer, sample_num):
 
 
 
-def sample_pos_neg_equal(pos_class):
+def sample_pos_neg_equal(pos_class, sample_size=10):
     """
     Create dataset of 1000 positives and 1000 negatives with 10 negatives
     from each of the negative classes. Also returns targets
@@ -113,7 +135,6 @@ def sample_pos_neg_equal(pos_class):
     :return: List of dataset sample ndarray + targets
     """
     interval = 1000
-    sample_size = 10
     dataset_sample = []
 
     # using int to string and back to int to get
@@ -132,11 +153,50 @@ def sample_pos_neg_equal(pos_class):
     for i in range(0, number_of_classes):
         if i is not pos_class:
             dataset_sample.extend(sample_random_from_class(i, sample_size))
-
-    targets = np.concatenate((targets, np.full((1000,), 0)))
+            targets = np.concatenate((targets, np.full((sample_size,), 0)))
 
     return np.array(dataset_sample), targets
 
+
+def sample_pos_neg_multy(sample_size=10):
+    """
+    Creates vector targets instead of binary scalars
+    :param sample_size:
+    :return:
+    """
+    dataset_sample = []
+
+    # create positive targets
+    targets = []
+
+    for i in range(0, number_of_classes):
+        dataset_sample.extend(sample_random_from_class(i, sample_size))
+        for j in range(0, sample_size):
+            # Append targets for that class
+            targets.append(make_target(i))
+
+    return np.array(dataset_sample), np.array(targets)
+
+
+def make_target(pos_class):
+    """
+    Create a vector with a all zeros for other classes
+    :param pos_class:
+    :return:
+    """
+    t = np.zeros((101,))
+    t[pos_class] = 1
+    return t
+
+
+def get_train_test_split(x, y, test_size=0.1):
+    """
+    Load the full data and  then split to training and validation samples
+    :param pos_class: The positive class number
+    :param test_size: percentage of test set size
+    :return:
+    """
+    pass
 
 
 
@@ -156,5 +216,13 @@ def sample_pos_neg_equal(pos_class):
 # #Sample from all classes
 # sample_rand_from_each_class(20)
 
-# train_sample = sample_pos_neg_equal(2)
-# print(len(train_sample))
+# x, y = sample_pos_neg_equal(2)
+# print(len(x))
+# get_train_test_split(x, y)
+
+#print(load_labels_unique())
+
+# img = cv.imread(imgs_path + '1000.jpg')
+# display_image(img)
+# img = imread(imgs_path + '1000.jpg')
+# display_image(img)
