@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 
 imgs_path = 'Dataset/training_data/'
 labels_path = 'Dataset/training_labels.txt'
-
+number_of_classes = 101
 
 def load_data_range(min, max):
     """
     Load images from the dataset within a given range
     :param min: Lower bound for array index
     :param max: Uper bound for array index
-    :return: Python list of 3d numpy images
+    :return: Python list of 3d ndarray images
     """
     imgs = []
     for img_file in range(min, max):
@@ -24,7 +24,7 @@ def load_data_indexes(indexes):
     """
     Load image that are in the given index list
     :param indexes: List of indexes
-    :return: List of images
+    :return: List of ndarray images
     """
     imgs = []
     for img_file in indexes:
@@ -35,7 +35,7 @@ def load_data_indexes(indexes):
 
 def display_image(image):
     """
-    Display the image given as a 2d or 3d array of values.
+    Display the image given as a 2d or 3d ndarray of values.
     :param image: Input image to display
     """
     image = np.squeeze(image)
@@ -65,9 +65,9 @@ def sample_rand_from_each_class(samples_num):
     :return: Full dataset sample (should be of size samples_num * 101)
     """
     data_pointer = 0
-    interval = 1001
+    interval = 1000
     dataset_sample = []
-    for i in range(0, 101):
+    for i in range(0, number_of_classes):
         class_sample = []
         # Sample indexes with the class range
         indexes = np.random.randint(data_pointer, data_pointer + interval, samples_num)
@@ -78,17 +78,62 @@ def sample_rand_from_each_class(samples_num):
 
     print(len(dataset_sample))
     return dataset_sample
-    # sample_data = []
-    # sample_data.append(np.random.choice(data))
 
 
-# # Example to load and display images
+def sample_random_from_class(class_pointer, sample_num):
+    """
+    Sample from a given class a given number of samples
+    :param class_pointer: An integer from [0-101] indicating the class
+    :param sample_num: An integer number of the samples requested
+    :return: List of ndarray sample images from the class
+    """
+    interval = 1000
+    # Sample indexes with the class range
+    indexes = np.random.randint(class_pointer, class_pointer + interval, sample_num)
+    # Load all images given by the indexes
+    class_sample = load_data_indexes(indexes)
+    return class_sample
+
+
+
+def sample_pos_neg_equal(pos_class):
+    interval = 1000
+    sample_size = 10
+    dataset_sample = []
+
+    # using int to string and back to int to get
+    # the correct index for class indexes
+    lower = str(pos_class)
+    lower += '000'
+    lower = int(pos_class)
+    upper = lower + interval
+    # TODO: Need to ask Norbert how manny classes there are and if the interval
+    # 1000 images for each class
+    # Sample full positive class
+    dataset_sample.extend(load_data_range(lower, upper))
+
+    # Sample 100 images from each of the other classes
+    for i in range(0, number_of_classes):
+        if i is not pos_class:
+            dataset_sample.extend(sample_random_from_class(i, sample_size))
+
+    return dataset_sample
+
+
+
+# # Examples for each of the methods
 # images = load_data(0, 5)
 # display_image(images[0])
 #
 # # Example to load labels
 # labels = load_labels()
 # print(len(labels))
+# labels = np.array(labels)
+# labels = np.unique(labels)
+# print(labels.shape)
 
-#Sample from all classes
-sample_rand_from_each_class(20)
+# #Sample from all classes
+# sample_rand_from_each_class(20)
+
+# train_sample = sample_pos_neg_equal(2)
+# print(len(train_sample))
