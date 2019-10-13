@@ -15,7 +15,7 @@ def loadData(path,identifier="*food*csv"):
         df = pd.read_csv(fName[0],encoding='Windows-1252')
         return df
 
-path = "../data/"
+path = "./"
 
 df = loadData(path)
 df.head()   
