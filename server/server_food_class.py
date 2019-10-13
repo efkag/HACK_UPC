@@ -23,6 +23,7 @@ from keras import applications
 from keras.models import Model
 from keras.models import load_model
 import tensorflow as tf
+import depth_manager as dm
 
 from base64 import decodestring
 
@@ -75,7 +76,7 @@ class ClassificationAPI1(Resource):
         #
         #
         #
-
+        volume = dm.estimate_cal(img=im,label=classname)
 
 
 
