@@ -4,10 +4,11 @@ import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from PIL import Image
+import pdb
 
 import models
 
-def predict(model_data_path, image_path):
+def predict(model_data_path, image_path, showPlot=False):
 
     tf.reset_default_graph()
     # Default input size
@@ -44,14 +45,14 @@ def predict(model_data_path, image_path):
         pred = sess.run(net.get_output(), feed_dict={input_node: img})
         
         # Plot result
-        fig = plt.figure()
-        ii = plt.imshow(pred[0,:,:,0], interpolation='nearest')
-        fig.colorbar(ii)
-        plt.show(block=False)
+        if showPlot:
+            fig = plt.figure()
+            ii = plt.imshow(pred[0,:,:,0], interpolation='nearest')
+            fig.colorbar(ii)
+            plt.show(block=False)
         
         return pred
-        
-                
+
 def main():
     # Parse arguments
     parser = argparse.ArgumentParser()
@@ -64,7 +65,18 @@ def main():
     
     os._exit(0)
 
-        
+def estimate_volume(img):
+    thr = 1.05
+    model_path = "NYU_FCRN.ckpt"
+    preds = t_preds = predict(model_path,img)
+    t_preds[t_preds<thr] = 1
+    t_preds[t_preds>=thr] = 0
+    print(t_preds.sum())
+    print(t_preds.size)
+    plt.imshow(t_preds[0,:,:,0])
+    plt.show()
+    return t_preds.sum()/t_preds.size
+    
 
 
 
