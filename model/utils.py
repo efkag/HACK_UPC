@@ -17,9 +17,12 @@ def load_data_range(min, max):
     """
     imgs = []
     for img_file in range(min, max):
-        imgs.append(imread(imgs_path + str(img_file) + '.jpg'))
+        img = imread(imgs_path + str(img_file) + '.jpg')/255
+        if img.ndim == 3:
+            imgs.append(img)
+        else:
+            imgs.append(imgs[-1])
     return np.array(imgs)
-
 
 def load_full():
 
@@ -41,7 +44,11 @@ def load_data_indexes(indexes):
     """
     imgs = []
     for img_file in indexes:
-        imgs.append(imread(imgs_path + str(img_file) + '.jpg'))
+        img = imread(imgs_path + str(img_file) + '.jpg')/255
+        if img.ndim == 3:
+            imgs.append(img)
+        else:
+            imgs.append(imgs[-1])
     return np.array(imgs)
 
 
@@ -151,17 +158,17 @@ def sample_pos_neg_equal(pos_class, sample_size=10):
     upper = lower + interval
 
     # Sample full positive class
-    dataset_sample.append(load_data_range(lower, upper))
+    dataset_sample = (load_data_range(lower, upper))
     # create positive targets
     targets = np.full((1000,), 1)
 
     # Sample 10 images from each of the other classes
     for i in range(0, number_of_classes):
         if i is not pos_class:
-            dataset_sample.append(sample_random_from_class(i, sample_size))
+            dataset_sample = np.concatenate((dataset_sample, sample_random_from_class(i, sample_size)))
             targets = np.concatenate((targets, np.full((sample_size,), 0)))
 
-    return np.array(dataset_sample), targets
+    return dataset_sample, targets
 
 
 def sample_pos_neg_multi(sample_size=10):
@@ -220,7 +227,7 @@ def print_class(vec):
 # print(len(x))
 # get_train_test_split(x, y)
 
-print(load_labels_unique()[43])
+print(load_labels_unique()[0])
 
 
 # img = cv.imread(imgs_path + '1000.jpg')

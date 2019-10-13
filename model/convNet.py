@@ -33,10 +33,10 @@ class ConvNet:  # Convolutional Net
         optimizer = tfk.optimizers.Adam(learning_rate)
         #optimizer = tfk.optimizers.SGD(learning_rate=learning_rate, nesterov=True, momentum=0.1)
         #optimizer = tfk.optimizers.RMSprop(learning_rate)
-        #bce = tfk.losses.BinaryCrossentropy()
-        cce = tfk.losses.categorical_crossentropy
+        bce = tfk.losses.BinaryCrossentropy()
+        #cce = tfk.losses.categorical_crossentropy
         #sce = tf.losses.softmax_cross_entropy
-        self.model.compile(optimizer=optimizer, loss=cce, metrics=['accuracy'])
+        self.model.compile(optimizer=optimizer, loss=bce, metrics=['accuracy'])
 
         # Print model
         self.model.summary()
@@ -51,14 +51,17 @@ class ConvNet:  # Convolutional Net
             tfkl.Conv2D(self.filters * 2, self.kernel_size, padding=self.padding, activation=self.activ_func,
                         data_format='channels_last'),
             tfkl.MaxPool2D((2, 2), data_format='channels_last'),
-            # tfkl.Conv2D(self.filters * 4, self.kernel_size, padding=self.padding, activation=self.activ_func,
-            #             data_format='channels_last'),
-            # tfkl.MaxPool2D((2, 2)),
+            tfkl.Conv2D(self.filters * 4, self.kernel_size, padding=self.padding, activation=self.activ_func,
+                        data_format='channels_last'),
+            tfkl.MaxPool2D((2, 2)),
+            tfkl.Conv2D(self.filters * 8, self.kernel_size, padding=self.padding, activation=self.activ_func,
+                        data_format='channels_last'),
+            tfkl.MaxPool2D((2, 2)),
             tfkl.Flatten(),
-            tfkl.Dense(4000, activation=self.activ_func),
-                       #activity_regularizer=tf.keras.regularizers.l2(0.0001)),
+            tfkl.Dense(2000, activation=self.activ_func,
+                       activity_regularizer=tf.keras.regularizers.l2(0.0001)),
             tfkl.Dense(1000, activation=self.activ_func),
-            tfkl.Dense(101, activation=tfk.activations.softmax)
+            tfkl.Dense(1, activation=self.out_activ_func)
         ])
 
 
@@ -66,8 +69,7 @@ class ConvNet:  # Convolutional Net
         self.logs = self.model.fit(x, y,
                                    batch_size=self.batch_size,
                                    epochs=self.epochs,
-                                   shuffle=True,
-                                   validation_data=(val_data[0], val_data[1]))
+                                   shuffle=True)
 
 
     def predict(self, x):
@@ -87,3 +89,6 @@ class ConvNet:  # Convolutional Net
 
     def evaluate_model(self, x_val, t_val):
         test_loss, test_acc = self.model.evaluate(x_val, t_val, verbose=2)
+
+    def model_save(self, id):
+        self.model.save('models/model_' + str(id) + '.h5')
