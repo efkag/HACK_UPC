@@ -50,19 +50,19 @@ for lab in labels.iterrows():
         subSet = df[df['Name'].str.contains(iName_1) |
                     df['Name'].str.contains(iName_2) |
                     df['Name'].str.contains(iName_3)]
+        if not subSet.empty:
+            print(iName_1+" "+iName_2+" "+iName_3+","+str(int(subSet.Energy.median())))
     if len(iName_1)>0 & len(iName_2)>0:
         subSet = df[df['Name'].str.contains(iName_1) |
                     df['Name'].str.contains(iName_2)]
+        if not subSet.empty:
+            print(iName_1+" "+iName_2+","+str(int(subSet.Energy.median())))            
     if len(iName_1)>0:
         subSet = df[df['Name'].str.contains(iName_1)]
-    # if not subSet.empty:
-        # k = k+1
-        # plt.figure()
-        # plt.boxplot(subSet[FEATURE])
-        # if k == 9:
-            # plt.show(block=False)
-        # else:
-            # plt.show(block=True)
+        if not subSet.empty:
+            print(iName_1+","+str(int(subSet.Energy.median())))
     # else:
-    if subSet.empty:
-        print(itemName)
+    # if subSet.empty:
+        # print(itemName)
+    # else:
+        # print(iName_1+" "+iName_2+" "+iName_3+","+str(int(subSet.Energy.median())))
