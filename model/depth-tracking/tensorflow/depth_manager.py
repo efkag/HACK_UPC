@@ -5,10 +5,11 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 from PIL import Image
 import pdb
+import pandas as pd
 
 import models
 
-def predict(model_data_path, image_path, showPlot=False):
+def predict(model_data_path, img, showPlot=False):
 
     tf.reset_default_graph()
     # Default input size
@@ -18,7 +19,6 @@ def predict(model_data_path, image_path, showPlot=False):
     batch_size = 1
    
     # Read image
-    img = Image.open(image_path)
     img = img.resize([width,height], Image.ANTIALIAS)
     img = np.array(img).astype('float32')
     img = np.expand_dims(np.asarray(img), axis = 0)
@@ -46,10 +46,8 @@ def predict(model_data_path, image_path, showPlot=False):
         
         # Plot result
         if showPlot:
-            fig = plt.figure()
             ii = plt.imshow(pred[0,:,:,0], interpolation='nearest')
-            fig.colorbar(ii)
-            plt.show(block=False)
+            
         
         return pred
 
@@ -68,15 +66,18 @@ def main():
 def estimate_volume(img):
     thr = 1.05
     model_path = "NYU_FCRN.ckpt"
-    preds = t_preds = predict(model_path,img)
+    preds = t_preds = predict(model_path,img=img, showPlot=False)
     t_preds[t_preds<thr] = 1
     t_preds[t_preds>=thr] = 0
-    print(t_preds.sum())
-    print(t_preds.size)
-    plt.imshow(t_preds[0,:,:,0])
-    plt.show()
     return t_preds.sum()/t_preds.size
     
-
+def estimate_cal(img,label):
+    CONSTANT = 6
+    vol = estimate_volume(img)
+    map_list = pd.read_csv("..\..\..\data\labels_online.csv")
+    cal_p_g = map_list[map_list.Name==label].Energy.iloc[0]
+    return vol*cal_p_g*CONSTANT
+    
+    
 
 
