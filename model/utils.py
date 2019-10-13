@@ -18,8 +18,7 @@ def load_data_range(min, max):
     imgs = []
     for img_file in range(min, max):
         imgs.append(imread(imgs_path + str(img_file) + '.jpg'))
-
-    return imgs
+    return np.array(imgs)
 
 
 def load_full():
@@ -43,8 +42,7 @@ def load_data_indexes(indexes):
     imgs = []
     for img_file in indexes:
         imgs.append(imread(imgs_path + str(img_file) + '.jpg'))
-
-    return imgs
+    return np.array(imgs)
 
 
 def display_image(image):
@@ -119,12 +117,20 @@ def sample_random_from_class(class_pointer, sample_num):
     :return: List of ndarray sample images from the class
     """
     interval = 1000
+    # using int to string and back to int to get
+    # the correct index for class indexes
+    lower = str(class_pointer)
+    lower += '000'
+    lower = int(lower)
+    upper = lower + interval
+
+
     # Sample indexes with the class range
-    indexes = np.random.randint(class_pointer, class_pointer + interval, sample_num)
+    indexes = np.random.randint(lower, upper, sample_num)
     # Load all images given by the indexes
     class_sample = load_data_indexes(indexes)
-    return class_sample
 
+    return class_sample
 
 
 def sample_pos_neg_equal(pos_class, sample_size=10):
@@ -141,24 +147,24 @@ def sample_pos_neg_equal(pos_class, sample_size=10):
     # the correct index for class indexes
     lower = str(pos_class)
     lower += '000'
-    lower = int(pos_class)
+    lower = int(lower)
     upper = lower + interval
 
     # Sample full positive class
-    dataset_sample.extend(load_data_range(lower, upper))
+    dataset_sample.append(load_data_range(lower, upper))
     # create positive targets
     targets = np.full((1000,), 1)
 
     # Sample 10 images from each of the other classes
     for i in range(0, number_of_classes):
         if i is not pos_class:
-            dataset_sample.extend(sample_random_from_class(i, sample_size))
+            dataset_sample.append(sample_random_from_class(i, sample_size))
             targets = np.concatenate((targets, np.full((sample_size,), 0)))
 
     return np.array(dataset_sample), targets
 
 
-def sample_pos_neg_multy(sample_size=10):
+def sample_pos_neg_multi(sample_size=10):
     """
     Creates vector targets instead of binary scalars
     :param sample_size:
@@ -188,16 +194,10 @@ def make_target(pos_class):
     t[pos_class] = 1
     return t
 
-
-def get_train_test_split(x, y, test_size=0.1):
-    """
-    Load the full data and  then split to training and validation samples
-    :param pos_class: The positive class number
-    :param test_size: percentage of test set size
-    :return:
-    """
-    pass
-
+def print_class(vec):
+    labels = load_labels_unique()
+    indx = np.argmax(vec)
+    print(labels[indx])
 
 
 # # Examples for each of the methods
@@ -220,7 +220,8 @@ def get_train_test_split(x, y, test_size=0.1):
 # print(len(x))
 # get_train_test_split(x, y)
 
-#print(load_labels_unique())
+print(load_labels_unique()[43])
+
 
 # img = cv.imread(imgs_path + '1000.jpg')
 # display_image(img)
