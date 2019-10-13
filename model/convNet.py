@@ -17,7 +17,7 @@ class ConvNet:  # Convolutional Net
         self.input_shape = input_shape
         print(self.input_shape)
         self.stride = stride
-        self.filters = 4  # The base filter number
+        self.filters = 8  # The base filter number
         self.out_activ_func = 'sigmoid'
         self.activ_func = 'relu'
         self.padding = padding  # SAME or VALID
@@ -28,13 +28,15 @@ class ConvNet:  # Convolutional Net
         self.model = None
         # Network structure
         self.x = None
-        #self.images = tfk.Input(dtype=tf.float32, shape=input_shape, name="Images")
         self.structure_net()
 
-        #optimizer = tf.keras.optimizers.Adam(learning_rate)
-        optimizer = tfk.optimizers.RMSprop(learning_rate)
-        bce = tf.keras.losses.BinaryCrossentropy()
-        self.model.compile(optimizer=optimizer, loss=bce, metrics=['accuracy'])
+        optimizer = tfk.optimizers.Adam(learning_rate)
+        #optimizer = tfk.optimizers.SGD(learning_rate=learning_rate, nesterov=True, momentum=0.1)
+        #optimizer = tfk.optimizers.RMSprop(learning_rate)
+        #bce = tfk.losses.BinaryCrossentropy()
+        cce = tfk.losses.categorical_crossentropy
+        #sce = tf.losses.softmax_cross_entropy
+        self.model.compile(optimizer=optimizer, loss=cce, metrics=['accuracy'])
 
         # Print model
         self.model.summary()
@@ -49,11 +51,13 @@ class ConvNet:  # Convolutional Net
             tfkl.Conv2D(self.filters * 2, self.kernel_size, padding=self.padding, activation=self.activ_func,
                         data_format='channels_last'),
             tfkl.MaxPool2D((2, 2), data_format='channels_last'),
-            tfkl.Conv2D(self.filters * 4, self.kernel_size, padding=self.padding, activation=self.activ_func,
-                        data_format='channels_last'),
-            tfkl.MaxPool2D((2, 2)),
+            # tfkl.Conv2D(self.filters * 4, self.kernel_size, padding=self.padding, activation=self.activ_func,
+            #             data_format='channels_last'),
+            # tfkl.MaxPool2D((2, 2)),
             tfkl.Flatten(),
-            tfkl.Dense(2000, activation=self.activ_func),
+            tfkl.Dense(4000, activation=self.activ_func),
+                       #activity_regularizer=tf.keras.regularizers.l2(0.0001)),
+            tfkl.Dense(1000, activation=self.activ_func),
             tfkl.Dense(101, activation=tfk.activations.softmax)
         ])
 
@@ -72,6 +76,14 @@ class ConvNet:  # Convolutional Net
     def visualize_perf(self):
         print(self.logs.history.keys())
         plt.plot(self.logs.history['acc'], label='accuracy')
+        plt.plot(self.logs.history['val_acc'], label='val_acc')
+        plt.legend()
+        plt.show()
+
+        plt.plot(self.logs.history['val_loss'], label='val_loss')
         plt.plot(self.logs.history['loss'], label='loss')
         plt.legend()
         plt.show()
+
+    def evaluate_model(self, x_val, t_val):
+        test_loss, test_acc = self.model.evaluate(x_val, t_val, verbose=2)
